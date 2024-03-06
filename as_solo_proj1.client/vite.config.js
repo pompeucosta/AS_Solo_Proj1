@@ -62,6 +62,10 @@ export default defineConfig({
             '^/logout': {
                 target,
                 secure: false
+            },
+            '^/details': {
+                target,
+                secure: false
             }
         },
         port: 5173,

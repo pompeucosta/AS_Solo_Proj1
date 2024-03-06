@@ -9,6 +9,7 @@ namespace AS_Solo_Proj1.Server.Models
         [Key]
         [ForeignKey("ClientID")]
         public int ClientID { get; set; }
+        public User User { get; set; }
         [Required]
         public string FullName { get; set; }
         [Required]
@@ -16,9 +17,6 @@ namespace AS_Solo_Proj1.Server.Models
         public int MedicalRecordNumber { get; set; }
         public string DiagnosisDetails { get; set; } //mask
         public string TreatmentPlan { get; set; } //mask
-        [Required]
-        public string AccessCode { get; set; }
 
-        public User User { get; set; }
     }
 }
