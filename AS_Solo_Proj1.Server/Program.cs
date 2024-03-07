@@ -85,7 +85,18 @@ namespace AS_Solo_Proj1.Server
             {
                 var u = user.FindFirstValue(ClaimTypes.Email);
                 var id = dbContext.Users.Where(_u => _u.UserName == u).First().Id;
-                var requesterID = dbContext.MyUsers.Where(_u => _u.BaseUser.Id == id).First().UserID;
+                var requester = dbContext.MyUsers.Where(_u => _u.BaseUser.Id == id).First();
+
+                if(requester.Role == Roles.Client)
+                {
+                    var clientID = dbContext.Clients.Where(c => c.User.UserID == requester.UserID).First().ClientID;
+                    if(clientID != details.ClientID)
+                    {
+                        return Results.Forbid();
+                    }
+                }
+
+                var requesterID = requester.UserID;
                 try
                 {
                     var c = dbContext.GetClientDetails(requesterID, details.ClientID, details.AccessCode);

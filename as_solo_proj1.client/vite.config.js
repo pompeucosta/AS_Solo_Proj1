@@ -51,7 +51,7 @@ export default defineConfig({
                 target,
                 secure: false
             },
-            '^/register': {
+            '^/my_register': {
                 target,
                 secure: false
             },
