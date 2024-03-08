@@ -87,13 +87,9 @@ namespace AS_Solo_Proj1.Server
                 var id = dbContext.Users.Where(_u => _u.UserName == u).First().Id;
                 var requester = dbContext.MyUsers.Where(_u => _u.BaseUser.Id == id).First();
 
-                if(requester.Role == Roles.Client)
+                if(requester.Role == Roles.Client && requester.UserID != details.ClientID)
                 {
-                    var clientID = dbContext.Clients.Where(c => c.User.UserID == requester.UserID).First().ClientID;
-                    if(clientID != details.ClientID)
-                    {
-                        return Results.Forbid();
-                    }
+                   return Results.Forbid();
                 }
 
                 var requesterID = requester.UserID;
