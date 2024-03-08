@@ -13,7 +13,10 @@ namespace AS_Solo_Proj1.Server
     {
         private static bool IsRequesterValid(ApplicationDbContext dbContext,User requester,int clientID)
         {
-            var client = dbContext.Clients.Include(c => c.User).Where(c => c.ClientID == clientID).First();
+            var client = dbContext.Clients.Include(c => c.User).FirstOrDefault(c => c.ClientID == clientID);
+            if(client == null)
+                return false;
+            
             if (requester.Role == Roles.Client)
             {
                 if (client == null)
@@ -102,12 +105,25 @@ namespace AS_Solo_Proj1.Server
                 var id = dbContext.Users.Where(_u => _u.UserName == u).First().Id;
                 var requester = dbContext.MyUsers.Where(_u => _u.BaseUser.Id == id).First();
 
-                if(!IsRequesterValid(dbContext, requester, details.ClientID))
-                    return Results.BadRequest(new { Message = "User not found" });
+                var cId = details.ClientID;
+
+                if(cId == -1)
+                {
+                    var client = dbContext.Clients.Include(c => c.User).FirstOrDefault(c => c.User.UserID == requester.UserID);
+                    if (client == null)
+                        return Results.BadRequest(new { Message = "User not found" });
+
+                    cId = client.ClientID;
+                }
+                else
+                {
+                    if(!IsRequesterValid(dbContext, requester, cId))
+                        return Results.BadRequest(new { Message = "User not found" });
+                }
 
                 try
                 {
-                    var c = dbContext.GetClientDetails(requester.UserID, details.ClientID, details.AccessCode);
+                    var c = dbContext.GetClientDetails(requester.UserID, cId, details.AccessCode);
                     if (c == null)
                         return Results.BadRequest(new { Message = "User not found" });
 

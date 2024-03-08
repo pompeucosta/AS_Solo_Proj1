@@ -43,10 +43,6 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
-            },
             '^/pingauth': {
                 target,
                 secure: false
@@ -64,6 +60,10 @@ export default defineConfig({
                 secure: false
             },
             '^/details': {
+                target,
+                secure: false
+            },
+            '^/edit': {
                 target,
                 secure: false
             }
