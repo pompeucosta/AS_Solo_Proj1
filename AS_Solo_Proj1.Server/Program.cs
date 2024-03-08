@@ -11,6 +11,21 @@ namespace AS_Solo_Proj1.Server
 {
     public class Program
     {
+        private static bool IsRequesterValid(ApplicationDbContext dbContext,User requester,int clientID)
+        {
+            var client = dbContext.Clients.Include(c => c.User).Where(c => c.ClientID == clientID).First();
+            if (requester.Role == Roles.Client)
+            {
+                if (client == null)
+                    return false;
+
+                var clientUserID = client.User?.UserID ?? -1;
+                if (clientUserID != requester.UserID)
+                    return false;
+            }
+
+            return true;
+        }
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -87,25 +102,20 @@ namespace AS_Solo_Proj1.Server
                 var id = dbContext.Users.Where(_u => _u.UserName == u).First().Id;
                 var requester = dbContext.MyUsers.Where(_u => _u.BaseUser.Id == id).First();
 
-                if(requester.Role == Roles.Client && requester.UserID != details.ClientID)
-                {
-                   return Results.Forbid();
-                }
+                if(!IsRequesterValid(dbContext, requester, details.ClientID))
+                    return Results.BadRequest(new { Message = "User not found" });
 
-                var requesterID = requester.UserID;
                 try
                 {
-                    var c = dbContext.GetClientDetails(requesterID, details.ClientID, details.AccessCode);
+                    var c = dbContext.GetClientDetails(requester.UserID, details.ClientID, details.AccessCode);
                     if (c == null)
-                    {
                         return Results.BadRequest(new { Message = "User not found" });
-                    }
 
                     return Results.Ok(new { Details = c });
                 }
                 catch (Exception ex)
                 {
-                    return Results.BadRequest(new { Message = "Internal error" });
+                    return Results.BadRequest(new { Message = "User not found" });
                 }
             }).RequireAuthorization();
 
@@ -120,13 +130,13 @@ namespace AS_Solo_Proj1.Server
                 }
 
                 var newUser = new User { BaseUser = identityUser, Role = Roles.Client };
-                _dbContext.MyUsers.Add(newUser);
-                _dbContext.SaveChanges();
 
-                var newClient = new Client { User = new Models.User { UserID = newUser.UserID }, DiagnosisDetails = "", TreatmentPlan = "", PhoneNumber = user.PhoneNumber, MedicalRecordNumber = -1, FullName = user.Name };
+                var newClient = new Client { User = newUser, DiagnosisDetails = "", TreatmentPlan = "", PhoneNumber = user.PhoneNumber, MedicalRecordNumber = -1, FullName = user.Name, AccessCode = user.AccessCode };
                 try
                 {
-                    _dbContext.InsertClient(newClient, user.AccessCode);
+                    _dbContext.Clients.Add(newClient);
+                    _dbContext.SaveChanges();
+
                 }
                 catch (Exception ex)
                 {
@@ -135,6 +145,30 @@ namespace AS_Solo_Proj1.Server
 
                 return Results.Ok(new { Message = "Success", });
             });
+
+            app.MapPost("/edit", (ClaimsPrincipal user, ApplicationDbContext dbContext,EditUserDetailsRequestModel data) =>
+            {
+                var u = user.FindFirstValue(ClaimTypes.Email);
+                var id = dbContext.Users.Where(_u => _u.UserName == u).First().Id;
+                var requester = dbContext.MyUsers.Where(_u => _u.BaseUser.Id == id).First();
+
+                if (!IsRequesterValid(dbContext, requester, data.ClientID))
+                    return Results.Forbid();
+
+                var rows = dbContext.UpdateClientDetails(new ClientDetails {FullName = data.FullName,
+                    DiagnosisDetails = data.DiagnosisDetails,MedicalRecordNumber = data.MedicalRecordNumber,
+                    PhoneNumber = data.PhoneNumber,TreatmentPlan = data.TreatmentPlan}, requester.UserID,
+                    data.ClientID, data.AccessCode);
+
+                if (rows == 0)
+                    return Results.BadRequest(new { Message = "Error" });
+
+                if(rows > 1)
+                    return Results.BadRequest(new {Message = "more than 1?"});
+
+                return Results.Ok(new {Message = "Updated successfully"});
+
+            }).RequireAuthorization();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

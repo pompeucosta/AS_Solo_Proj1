@@ -17,6 +17,7 @@ namespace AS_Solo_Proj1.Server.Models
         public int MedicalRecordNumber { get; set; }
         public string DiagnosisDetails { get; set; } //mask
         public string TreatmentPlan { get; set; } //mask
+        public string AccessCode { get; set; } = "";
 
     }
 }

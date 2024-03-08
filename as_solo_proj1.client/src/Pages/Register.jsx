@@ -5,6 +5,9 @@ function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [code, setCode] = useState("");
     const navigate = useNavigate();
 
     const [error, setError] = useState("");
@@ -18,18 +21,23 @@ function Register() {
         if (name === "email") setEmail(value);
         if (name === "password") setPassword(value);
         if (name === "confirmPassword") setConfirmPassword(value);
+        if (name === "name") setName(value);
+        if (name === "code") setCode(value);
+        if (name === "phone") setPhone(value);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!email || !password || !confirmPassword) {
+        if (!email || !password || !confirmPassword || !name || !phone || !code) {
             setError("Please fill in all fields");
         }
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             setError("Please enter a valid email address.");
         } else if (password !== confirmPassword) {
             setError("Passwords do not match.");
+        } else if (/^\d{9}$/.test(phone)) {
+            setError("Phone number must contain only digits and must have 9 digits");
         } else {
             // clear error message
             setError("");
@@ -40,8 +48,11 @@ function Register() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    name: name,
                     email: email,
                     password: password,
+                    phoneNumber: phone,
+                    accessCode: code
                 }),
             })
                 //.then((response) => response.json())
@@ -67,6 +78,17 @@ function Register() {
             <h3>Register</h3>
 
             <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="name">Name:</label>
+                </div><div>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={name}
+                        onChange={handleChange}
+                    />
+                </div>
                 <div>
                     <label htmlFor="email">Email:</label>
                 </div><div>
@@ -95,6 +117,28 @@ function Register() {
                         id="confirmPassword"
                         name="confirmPassword"
                         value={confirmPassword}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label htmlFor="phone">Phone Number:</label>
+                </div><div>
+                    <input
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        value={phone}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label htmlFor="code">Acess Code:</label>
+                </div><div>
+                    <input
+                        type="password"
+                        id="code"
+                        name="code"
+                        value={code}
                         onChange={handleChange}
                     />
                 </div>

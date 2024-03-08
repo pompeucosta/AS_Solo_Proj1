@@ -1,4 +1,5 @@
 ﻿using AS_Solo_Proj1.Server.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,24 +18,15 @@ namespace AS_Solo_Proj1.Server.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Client>().ToTable("Clients");
+            modelBuilder.Entity<Client>().ToTable(tb => tb.HasTrigger("HashAccessCode"));
             modelBuilder.Entity<User>().ToTable("Users");
         }
 
-        public void InsertClient(Client client,string accessCode)
-        {
-            var res = Database.ExecuteSql($"EXEC InsertClient {client.User.UserID},{client.FullName},{client.PhoneNumber},{client.MedicalRecordNumber},{client.DiagnosisDetails},{client.TreatmentPlan},{accessCode}");
-            if(res != 1)
-            {
-                throw new Exception("error while executing sql");
-            }
-        }
-
-        public Client? GetClientDetails(int requesterID,int clientID,string? code)
+        public ClientDetails? GetClientDetails(int requesterID,int clientID,string? code)
         {
             try
             {
-                var r = Clients.FromSql($"EXEC GetClientDetails {requesterID},{clientID},{code}");
+                var r = Database.SqlQuery<ClientDetails>($"EXEC GetClientDetails {requesterID},{clientID},{code}");
 
                 var l = r.ToList();
                 if (l.Count == 0)
@@ -47,6 +39,19 @@ namespace AS_Solo_Proj1.Server.Data
             catch(Exception ex)
             {
                 return null;
+            }
+        }
+
+        public int UpdateClientDetails(ClientDetails details,int requesterID,int clientID,string? code)
+        {
+            try
+            {
+                var rows = Database.ExecuteSql($"EXEC UpdateUserDetails {requesterID},{clientID},{code},{details.FullName},{details.PhoneNumber},{details.MedicalRecordNumber},{details.DiagnosisDetails},{details.TreatmentPlan}");
+                return rows;
+            }
+            catch(Exception e)
+            {
+                return -1;
             }
         }
     }
