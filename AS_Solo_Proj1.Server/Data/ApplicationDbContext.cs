@@ -1,5 +1,4 @@
 ﻿using AS_Solo_Proj1.Server.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
