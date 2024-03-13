@@ -29,9 +29,9 @@ function Login() {
             setError("");
             var loginurl = "";
             if (rememberMe == true)
-                loginurl = "/login?useCookies=true";
+                loginurl = "/my_login?useCookies=true";
             else
-                loginurl = "/login?useSessionCookies=true";
+                loginurl = "/my_login?useSessionCookies=true";
 
             fetch(loginurl, {
                 method: "POST",
