@@ -13,7 +13,6 @@ using OpenTelemetry.Trace;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Security.Claims;
-using System.Security.Cryptography;
 
 namespace AS_Solo_Proj1.Server
 {
@@ -121,7 +120,8 @@ namespace AS_Solo_Proj1.Server
                 x.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
                 .AddOtlpExporter(options =>
                 {
-                    options.Endpoint = new Uri("http://localhost:3100");
+                    options.Endpoint = new Uri(builder.Configuration.GetValue("Logs:Endpoint",
+                        "http://localhost:3100")!);
                 });
             });
 
