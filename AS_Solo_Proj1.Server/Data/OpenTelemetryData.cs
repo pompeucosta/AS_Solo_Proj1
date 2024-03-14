@@ -5,7 +5,7 @@ namespace AS_Solo_Proj1.Server.Data
 {
     public static class OpenTelemetryData
     {
-        private static Meter _meter = new Meter(ServiceName);
+        private static Meter _meter = new Meter(MeterName);
         public static string ServiceName => "AS.Proj1";
         public static string ServiceVersion => "1.0";
         public static string MeterName => "LoginMetrics";
