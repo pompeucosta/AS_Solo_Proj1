@@ -27,18 +27,13 @@ function Login() {
             setError("Please fill in all fields");
         } else {
             setError("");
-            var loginurl = "";
-            if (rememberMe == true)
-                loginurl = "/my_login?useCookies=true";
-            else
-                loginurl = "/my_login?useSessionCookies=true";
-
-            fetch(loginurl, {
+            
+            fetch("/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email: email, password: password, }),
+                body: JSON.stringify({ email: email, password: password, rememberMe: rememberMe }),
             })
                 .then((data) => {
                     console.log(data);
